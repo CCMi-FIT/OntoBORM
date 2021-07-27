@@ -1,0 +1,464 @@
+# Example of BORM ontology used with one of the examples
+# from Craft.CASE tool: E-shop
+#
+@prefix borm: <https://purl.org/ontoborm#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+@base <https://purl.org/ontoborm/examples/eshop#> .
+
+## BA
+:myEShop a borm:Business ;
+	rdfs:label "My E-Shop Example" ;
+	borm:hasFunction :f1, :f2, :f3, :f4 ;
+	
+:f1 a borm:ExternalFunction ;
+	rdfs:label "Sell Food" ;
+  rdfs:comment "Core business of FD company. Here is a collection of proceses performed by or performed for clients." .
+	
+:f2 a borm:ExternalFunction ;
+	rdfs:label "Dispatch Orders" ;
+  rdfs:comment "Here is collection of processes performed by FD management. This is about route planning, orders dispatching etc." .
+	
+:f3 a borm:InternalFunction ;
+	rdfs:label "Maintain Stock" ;
+  rdfs:comment "FD company internal responsibility. Here is collection of processes with no direct interface to any client." .
+	
+:f4 a borm:InternalFunction ;
+	rdfs:label "FD Website Maintenance" ;
+  rdfs:comment "User management, database actualization, SW and HW maintenance." .
+	
+:f5 a borm:ExternalFunction ;
+	rdfs:label "Advertize FD" ;
+  rdfs:comment "Collection of processes promoting FD business (both to clients and food suppliers)" .
+
+:sce1 a borm:Scenario ;
+	borm:usesScenario :sce1 ;
+	borm:ofFunction :fun1 ;
+	rdfs:label "customer places an order for food by the website" ;
+	borm:hasProcess :procPlaceOrder ;
+	borm:hasInitiation [
+		rdfs:label "Customer want to buy food." .
+	] ;
+	borm:hasAction [
+		rdfs:label "Customer logs into the website, selects food, and places his/her order." .
+	] ;
+	borm:hasResult [
+		rdfs:label "Order is accepted and payment is received." .
+	] .
+	
+:sce2 a borm:Scenario ;
+	borm:usesScenario :sce1 ;
+	borm:followedByScenario :sce3 ;
+	borm:ofFunction :f1 ;
+	rdfs:label "schedule delivery" ;
+	borm:hasInitiation [
+		rdfs:label "Customer wants to arrange delivery on specific date." .
+	] ;
+	borm:hasAction [
+		rdfs:label "Customer selects the best delivery date on website." .
+	] ;
+	borm:hasResult [
+		rdfs:label "Order delivery is planned on concrete date." .
+	] .
+	
+:sce3 a borm:Scenario ;
+	borm:usesScenario :sce4 ;
+	borm:ofFunction :f2 ;
+	rdfs:label "plan delivery route" ;
+	borm:hasInitiation [
+		rdfs:label "New day started." .
+	] ;
+	borm:hasAction [
+		rdfs:label "Routes are planned from information on website for all orders requested for delivery on current day." .
+	] ;
+	borm:hasResult [
+		rdfs:label "Route for each van driver for the current day is produced." .
+	] .
+	
+:sce4 a borm:Scenario ;
+	borm:extendsScenario :sce5 ;
+	borm:ofFunction :f2 ;
+	rdfs:label "deliver orders to customers" ;
+	borm:hasInitiation [
+		rdfs:label "Routes are planned and optimized." .
+	] ;
+	borm:hasAction [
+		rdfs:label "Van follows the predermined route to deliver its orders to customers." .
+	] ;
+	borm:hasResult [
+		rdfs:label "Food has been delivered." .
+	] .
+	
+:sce5 a borm:Scenario ;
+	borm:extendsScenario :sce5 ;
+	borm:ofFunction :f2 ;
+	rdfs:label "food order error" ;
+	borm:hasInitiation [
+		rdfs:label "Food is damaged or incorrect item has been delivered." .
+	] ;
+	borm:hasAction [
+		rdfs:label "Van driver and customer agreed that food should be returned and payment adjusted." .
+	] ;
+	borm:hasResult [
+		rdfs:label "The item is returned and the customer credited with its cost." .
+	] .
+	
+:sce5 a borm:Scenario ;
+	borm:ofFunction :f4 ;
+	rdfs:label "new customer registration" ;
+	borm:hasInitiation [
+		rdfs:label "A person wants to be a new customer." .
+	] ;
+	borm:hasAction [
+		rdfs:label "Person supplies his/her name, address etc. into website." .
+	] ;
+	borm:hasResult [
+		rdfs:label "Customer is registered and ready to apply order, or is refused." .
+	] .
+
+## Participants
+:parSupplier a borm:Participant, owl:Class ;
+	rdfs:label "Supplier" ;
+  rdfs:comment "Small company or individual farmer." .
+	
+:parSupermarketSupplier a borm:Participant, owl:Class ;
+	rdfs:label "Supermarker Supplier" ;
+	rdfs:subClassOf :parSupplier ;
+  rdfs:comment "Department of Supermarket responsible for food delivery." .
+	
+:parFDDatabase a borm:System, owl:Class ;
+	rdfs:label "FD Database" ;
+  rdfs:comment "Database of products, orders, routes, customers and suppliers." .
+	
+:parFDWebsite a borm:System, owl:Class ;
+	rdfs:label "FD Website" ;
+  rdfs:comment "Communication software enabling orders." .
+	
+:parSuppSystem a borm:System, owl:Class ;
+	rdfs:label "Supplier Ordering System" ;
+  rdfs:comment "Automatic system for requesting suppliers for food." .
+	
+:parVanDriver a borm:Person, owl:Class ;
+	rdfs:label "Van Driver" ;
+  rdfs:comment "Person who delivers food." .
+	
+:parLogisticsManager a borm:Person, owl:Class ;
+	rdfs:label "Logistics Manager" ;
+  rdfs:comment "Person responsible for the distribution of orders. This person uses information and scheduling system." .
+	
+:parCustomer a borm:Participant, owl:Class ;
+	rdfs:label "Customer" ;
+  rdfs:comment "Person who orders food or a person who wants to be a customer." .
+
+# OR: place order
+:procPlaceOrder a borm:Process ;
+	rdfs:label "place order" .
+
+:roCustomerRole a borm:Role ;
+	borm:ofProcess :procPlaceOrder ;
+	borm:startsWith :stCustStart ;
+	borm:endsWith :stCustEndRefused , :stCustEndSession , :stCustEnd ;
+	borm:ofParticipant :parCustomer .
+
+:roWebsiteRole a borm:Role ;
+	borm:ofProcess :procPlaceOrder ;
+	borm:startsWith :stWebStart ;
+	borm:endsWith :stWebEndRefused , :stWebCancelled , :stWebClosed ;
+	borm:ofParticipant :parFDWebsite .
+
+:roDatabaseRole a borm:Role ;
+	borm:ofProcess :procPlaceOrder ;
+	borm:ofParticipant :parFDDatabase .
+
+:actDbProvidesInfo a borm:Activity ;
+	borm:ofRole :roDatabaseRole ;
+	rdfs:label "provides info about customers" .
+
+:actDbInformsFood a borm:Activity ;
+	borm:ofRole :roDatabaseRole ;
+	rdfs:label "informs about food available" .
+
+:actDbInformsRoute a borm:Activity ;
+	borm:ofRole :roDatabaseRole ;
+	rdfs:label "informs about routes available" .
+
+:actDbStoresOrder a borm:Activity ;
+	borm:ofRole :roDatabaseRole ;
+	rdfs:label "stores new order" .
+
+:actCustRegisters a borm:Activity ;
+	borm:ofRole :roCustomerRole ;
+	rdfs:label "registeres into website" .
+
+:actCustIsAuthorised a borm:Activity ;
+	borm:ofRole :roCustomerRole ;
+	rdfs:label "is being authorised" .
+
+:actCustIsRefused a borm:Activity ;
+	borm:ofRole :roCustomerRole ;
+	rdfs:label "is being refused" .
+
+:actCustLeaving a borm:Activity ;
+	borm:ofRole :roCustomerRole ;
+	rdfs:label "leaving e-shop" .
+
+:actCustEndsSession a borm:Activity ;
+	borm:ofRole :roCustomerRole ;
+	rdfs:label "ends session" .
+
+:actWebAskReg a borm:Activity ;
+	borm:ofRole :roWebsiteRole ;
+	rdfs:label "is asked for registration" .
+
+:actWebRefuses a borm:Activity ;
+	borm:ofRole :roWebsiteRole ;
+	rdfs:label "refuses" .
+
+:actWebAuthorises a borm:Activity ;
+	borm:ofRole :roWebsiteRole ;
+	rdfs:label "authorises and opens e-shop" .
+
+:actWebCancels a borm:Activity ;
+	borm:ofRole :roWebsiteRole ;
+	rdfs:label "cancels e-shop" .
+
+:actWebCloses a borm:Activity ;
+	borm:ofRole :roWebsiteRole ;
+	rdfs:label "closes e-shop" .
+
+:stCustStart a borm:State ;
+	borm:ofRole :roCustomerRole .
+
+:stCustEndRefused a borm:State ;
+	borm:ofRole :roCustomerRole .
+
+:stCustEndSession a borm:State ;
+	borm:ofRole :roCustomerRole .
+
+:stCustEnd a borm:State ;
+	borm:ofRole :roCustomerRole .
+
+:stCustWaits a borm:State ;
+	rdfs:label "waits at authorisation" ;
+	borm:ofRole :roCustomerRole .
+
+:stCustInEShop a borm:State ;
+	rdfs:label "in e-shop" ;
+	borm:startsWith :stCustInStart ;
+	borm:endsWith :stCustInEnd ;
+	borm:ofRole :roCustomerRole .
+
+:stCustInStart a borm:State ;
+	borm:ofRole :stCustInEShop .
+
+:actCustInSelectsFood a borm:Activity ;
+	borm:ofRole :stCustInEShop ;
+	rdfs:label "selects food" .
+
+:stCustInFoodSelected a borm:State ;
+	borm:ofRole :stCustInEShop ;
+	rdfs:label "food is selected" .
+
+:actCustInSelectsRoute a borm:Activity ;
+	borm:ofRole :stCustInEShop ;
+	rdfs:label "selects route" .
+
+:stCustInRouteSelected a borm:State ;
+	borm:ofRole :stCustInEShop ;
+	rdfs:label "route is selected" .
+
+:actCustInConfirms a borm:Activity ;
+	borm:ofRole :stCustInEShop ;
+	rdfs:label "confirms shopping" .
+
+:stCustInEnd a borm:State ;
+	borm:ofRole :stCustInEShop .
+
+:stWebStart a borm:State ;
+	borm:ofRole :roWebsiteRole .
+
+:stWebEndRefused a borm:State ;
+	borm:ofRole :roWebsiteRole .
+
+:stWebCancelled a borm:State ;
+	borm:ofRole :roWebsiteRole .
+
+:stWebClosed a borm:State ;
+	borm:ofRole :roWebsiteRole .
+
+:stWebAuthorising a borm:State ;
+	rdfs:label "authorising" ;
+	borm:ofRole :roWebsiteRole .
+
+:actWebComparesLogin a borm:Activity ;
+	borm:ofRole :stWebAuthorising ;
+	rdfs:label "compares login data" .
+
+:stWebOpened a borm:State ;
+	rdfs:label "e-shop is opened" ;
+	borm:ofRole :roWebsiteRole .
+
+:actWebDisplaysFood a borm:Activity ;
+	borm:ofRole :stWebOpened ;
+	rdfs:label "displays food catalogue" .
+
+:actWebDisplaysRoutes a borm:Activity ;
+	borm:ofRole :stWebOpened ;
+	rdfs:label "displays routes available" .
+
+## Transitions
+:trCust1 a borm:Transition ;
+	borm:sourceState :stCustStart ;
+	borm:targetState :stCustWaits ;
+	borm:transitsThrough :actCustRegisters .
+
+:trCust2a a borm:Transition ;
+	borm:sourceState :stCustWaits ;
+	borm:targetState :stCustInEShop ;
+	borm:transitsThrough :actCustIsAuthorised .
+
+:trCust2b a borm:Transition ;
+	borm:sourceState :stCustWaits ;
+	borm:targetState :stCustEndRefused ;
+	borm:transitsThrough :actCustIsRefused .
+
+:trCust3 a borm:Transition ;
+	borm:sourceState :stCustInEShop ;
+	borm:targetState :stCustEnd ;
+	borm:transitsThrough :actCustLeaving .
+
+:trCust4 a borm:Transition ;
+	borm:sourceState :stCustInEShop ;
+	borm:targetState :stCustEndSession ;
+	borm:transitsThrough :actCustEndsSession .
+
+:trCustIn1 a borm:Transition ;
+	borm:sourceState :stCustInStart ;
+	borm:targetState :stCustInFoodSelected ;
+	borm:transitsThrough :actCustInSelectsFood .
+
+:trCustIn2 a borm:Transition ;
+	borm:sourceState :stCustInFoodSelected ;
+	borm:targetState :stCustInRouteSelected ;
+	borm:transitsThrough :actCustInSelectsRoute .
+
+:trCustIn3 a borm:Transition ;
+	borm:sourceState :stCustInRouteSelected ;
+	borm:targetState :stCustInEnd ;
+	borm:transitsThrough :actCustInConfirms .
+
+:trWeb1 a borm:Transition ;
+	borm:sourceState :stWebStart ;
+	borm:targetState :stWebAuthorising ;
+	borm:transitsThrough :actWebAskReg .
+
+:trWeb2a a borm:Transition ;
+	borm:sourceState :stWebAuthorising ;
+	borm:targetState :stWebOpened ;
+	borm:transitsThrough :actWebAuthorises .
+
+:trWeb2b a borm:Transition ;
+	borm:sourceState :stWebAuthorising ;
+	borm:targetState :stWebEndRefused ;
+	borm:transitsThrough :actWebRefuses .
+
+:trWeb3a a borm:Transition ;
+	borm:sourceState :stWebOpened ;
+	borm:targetState :stWebClosed ;
+	borm:transitsThrough :actWebCloses .
+
+:trWeb3b a borm:Transition ;
+	borm:sourceState :stWebOpened ;
+	borm:targetState :stWebCancelled ;
+	borm:transitsThrough :actWebCancels .
+
+## Communication
+:coCustWeb1 a borm:SynchronousCommunication ;
+	borm:sourceActivity :actCustRegisters ;
+	borm:targetActivity :actWebAskReg ;
+	borm:hasInputFlow :dfLoginData .
+
+:coCustWeb2a a borm:SynchronousCommunication ;
+	borm:sourceActivity :actWebAuthorises ;
+	borm:targetActivity :actCustIsAuthorised .
+
+:coCustWeb2a a borm:SynchronousCommunication ;
+	borm:sourceActivity :actWebRefuses ;
+	borm:targetActivity :actCustIsRefused .
+
+:coCustWeb3 a borm:SynchronousCommunication ;
+	borm:sourceActivity :actCustInSelectsFood ;
+	borm:targetActivity :actWebDisplaysFood ;
+	borm:hasOutputFlow :dfFood .
+
+:coCustWeb4 a borm:SynchronousCommunication ;
+	borm:sourceActivity :actCustInSelectsRoute ;
+	borm:targetActivity :actWebDisplaysRoutes ;
+	borm:hasOutputFlow :dfRoute .
+
+:coCustWeb5a a borm:SynchronousCommunication ;
+	borm:sourceActivity :actCustInConfirms ;
+	borm:targetActivity :actWebCloses .
+
+:coCustWeb5b a borm:SynchronousCommunication ;
+	borm:sourceActivity :actCustEndsSession ;
+	borm:targetActivity :actWebCancels .
+
+:coWebDB1 a borm:SynchronousCommunication ;
+	borm:sourceActivity :actWebComparesLogin ;
+	borm:targetActivity :actDbProvidesInfo ;
+	borm:hasInputFlow :dfLoginData ;
+	borm:hasOutputFlow :dfLoginData .
+
+:coWebDB2 a borm:SynchronousCommunication ;
+	borm:sourceActivity :actWebDisplaysFood ;
+	borm:targetActivity :actDbInformsFood ;
+	borm:hasOutputFlow :dfFood .
+
+:coWebDB3 a borm:SynchronousCommunication ;
+	borm:sourceActivity :actWebDisplaysRoutes ;
+	borm:targetActivity :actDbInformsRoute ;
+	borm:hasOutputFlow :dfRoute .
+
+:coWebDB4 a borm:SynchronousCommunication ;
+	borm:sourceActivity :actWebCloses ;
+	borm:targetActivity :actDbStoresOrder ;
+	borm:hasInputFlow :dfOrder .
+
+## Data Flows
+:dfLoginData a borm:DataFlow ;
+	rdfs:label "Login data" .
+	
+:dfFood a borm:DataFlow ;
+	rdfs:label "Food" .
+	
+:dfLoginData a borm:DataFlow ;
+	rdfs:label "Route" .
+	
+:dfOrder a borm:DataFlow ;
+	rdfs:label "Order" .
+
+## Constraints
+:cstNoMatch a borm:Constraint ;
+	borm:ofTransition :trWeb2b ;
+	rdfs:label "no match" ;
+	rdfs:comment "Login data does not match." ;
+
+:cstMatch a borm:Constraint ;
+	borm:ofTransition :trWeb2a ;
+	rdfs:label "match" ;
+	rdfs:comment "Login data does match." ;
+
+:cstEndSession a borm:Constraint ;
+	borm:ofTransition :trCust4 ;
+	rdfs:label "end of session" ;
+	rdfs:comment "Website visit session is terminated or expired (exception)." ;
