@@ -1,0 +1,11 @@
+# Example of SPARQL query to count activities for each participant.
+# 
+SELECT
+	?p, ?p_label, (count(distinct ?a) as ?cnt)
+WHERE {
+	# PREFIXes
+	?a rdf:type borm:Activity .
+	?a borm:ofRole ?r .
+	?r borm:ofParticipant ?p .
+	?p rdfs:label ?p_label .
+} ORDER BY DESC(?cnt)

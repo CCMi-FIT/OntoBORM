@@ -1,0 +1,13 @@
+# Example of SPARQL query to check if there is communication 
+# from *p1* towards *p2* in any process.
+#
+ASK {
+	# PREFIXes
+	:p1 borm:hasRole ?r1 .
+	?r1 borm:hasElement ?e1 .
+	:p2 borm:hasRole ?r2 .
+	?r2 borm:hasElement ?e2 .
+	?c a borm:Communication .
+	?c borm:sourceActivity ?e1 .
+	?c borm:targetActivity ?e2 .
+}

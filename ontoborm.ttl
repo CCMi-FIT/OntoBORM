@@ -1,0 +1,422 @@
+@prefix borm: <https://purl.org/ontoborm#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+@base <https://purl.org/ontoborm#> .
+
+#####################################################################
+## Ontology Metadata
+#####################################################################
+<https://purl.org/ontoborm#> a owl:Ontology ;
+  owl:versionIRI <https://purl.org/ontoborm/0.1.0> ;
+  dct:hasVersion "0.1.0" ;
+  dct:creator  "Marek Suchánek" ;
+  dct:description "OWL ontology for representing BORM models in RDF."@en ;
+  dct:rights "https://creativecommons.org/licenses/by-sa/4.0/" ;
+  dct:title "BORM Ontology"@en ;
+  vann:preferredNamespacePrefix "borm" .
+
+#####################################################################
+## Common
+#####################################################################
+borm:Entity a owl:Class ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:minCardinality 1 ;
+                    owl:maxCardinality 1 ;
+                    owl:onProperty rdfs:label
+                  ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:minCardinality 1 ;
+                    owl:maxCardinality 1 ;
+                    owl:onProperty skos:prefLabel
+                  ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:minCardinality 1 ;
+                    owl:maxCardinality 1 ;
+                    owl:onProperty rdfs:comment
+                  ] .
+
+#####################################################################
+## BORM BA - Business Architecture
+#####################################################################
+borm:Business a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "Business"@en ;
+  skos:prefLabel "Business"@en ;
+  rdfs:comment "A business unit that has several functions. It is recommended to relate this to existing entity described with additional information about the business."@en .
+
+borm:Function a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  owl:unionOf (borm:InternalFunction borm:ExternalFunction) ;
+  rdfs:label "Function"@en ;
+  skos:prefLabel "Function"@en ;
+  rdfs:comment "A business function that describes what a business does. It is further divided to internal and external."@en .
+
+borm:InternalFunction a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  owl:disjointWith borm:ExternalFunction ;
+  rdfs:label "Internal Function"@en ;
+  skos:prefLabel "Internal Function"@en ;
+  rdfs:comment "A business function that creates internal products, i.e., not exposed to customers. Typically it supports external functions or business operations. For example, Maintain Stock in an internal business function."@en ;
+  rdfs:subClassOf borm:Function .
+
+borm:ExternalFunction a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  owl:disjointWith borm:InternalFunction ;
+  rdfs:label "External Function"@en ;
+  skos:prefLabel "External Function"@en ;
+  rdfs:comment "A business function that creates external products, i.e., using interaction with outside world. For example, Sell Food is an external business function."@en ;
+  rdfs:subClassOf borm:Function .
+
+borm:Scenario a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "Scenario"@en ;
+  skos:prefLabel "Scenario"@en ;
+  rdfs:comment "It describes the procedure within a single business function. It can form a reusable entity (a scenario can be used a part of other scenarios). Scenarios may form a sequence by following each other. For example, \"schedule delivery\" is a scenario of Sell Food business function."@en .
+
+borm:Process a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "Process"@en ;
+  skos:prefLabel "Process"@en ;
+  rdfs:comment "It is a specific realisation of a scenario where participants have defined states and activities, and communicate with each other in order to fulfil the scenario."@en .
+
+borm:Initiation a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "Initiation"@en ;
+  skos:prefLabel "Initiation"@en ;
+  rdfs:comment "It describes what initiates a process. It can be a period event or more generically, when a certain fact occurs. For example, \"Customer wants to arrange delivery on specific date.\" is an initiation for \"schedule delivery\" process. It can be modelled by various ways (e.g. just a description or a specific domain subclass)."@en .
+
+borm:Action a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "Action"@en ;
+  skos:prefLabel "Action"@en ;
+  rdfs:comment "It describes what action is taken during a process. For example, \"Customer selects the best delivery date on website.\" is an action for \"schedule delivery\" process. It can be modelled by various ways (e.g. just a description or a specific domain subclass)."@en .
+
+borm:Result a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "Result"@en ;
+  skos:prefLabel "Result"@en ;
+  rdfs:comment "It describes what is the result of a process. For example, \"Order delivery is planned on concrete date.\" is a result for \"schedule delivery\" process. It can be modelled by various ways (e.g. just a description or a specific domain subclass)."@en .
+
+borm:hasFunction a owl:ObjectProperty ;
+  rdfs:domain borm:Business ;
+  rdfs:range borm:Function ;
+  rdfs:label "hasFunction"@en ;
+  skos:prefLabel "hasFunction"@en ;
+  rdfs:comment "It relates a business with its function."@en .
+
+borm:hasScenario a owl:ObjectProperty ;
+  rdfs:domain borm:Function ;
+  rdfs:range borm:Scenario ;
+  rdfs:label "hasScenario"@en ;
+  skos:prefLabel "hasScenario"@en ;
+  rdfs:comment "It relates a function with its scenario."@en .
+
+borm:hasProcess a owl:ObjectProperty ;
+  rdfs:domain borm:Scenario ;
+  rdfs:range borm:Process ;
+  rdfs:label "hasProcess"@en ;
+  skos:prefLabel "hasProcess"@en ;
+  rdfs:comment "It relates a scenario with its process."@en .
+
+borm:ofBusiness a owl:ObjectProperty ;
+  owl:inverseOf borm:hasFunction ;
+  rdfs:label "ofBusiness"@en ;
+  skos:prefLabel "ofBusiness"@en ;
+  rdfs:comment "It relates a function with the business where it belongs."@en .
+
+borm:ofFunction a owl:ObjectProperty ;
+  owl:inverseOf borm:hasScenario ;
+  rdfs:label "ofFunction"@en ;
+  skos:prefLabel "ofFunction"@en ;
+  rdfs:comment "It relates a scenario with the function where it belongs."@en .
+
+borm:ofScenario a owl:ObjectProperty ;
+  rdfs:domain borm:Function ;
+  rdfs:range borm:Scenario ;
+  rdfs:label "ofScenario"@en ;
+  skos:prefLabel "ofScenario"@en ;
+  rdfs:comment "It relates a process with the scenario where it belongs."@en .
+
+borm:usesScenario a owl:ObjectProperty ;
+  rdfs:domain borm:Scenario ;
+  rdfs:range borm:Scenario ;
+  rdfs:label "usesScenario"@en ;
+  skos:prefLabel "usesScenario"@en ;
+  rdfs:comment "A scenario may use another scenario. For example, \"schedule delivery\" uses \"customer places an order for food by the website\"."@en .
+
+borm:extendsScenario a owl:ObjectProperty ;
+  rdfs:domain borm:Scenario ;
+  rdfs:range borm:Scenario ;
+  rdfs:label "extendsScenario"@en ;
+  skos:prefLabel "extendsScenario"@en ;
+  rdfs:comment "A scenario may extend another scenario. For example, \"food order error\" extends \"deliver orders to customers\"."@en .
+
+borm:followsScenario a owl:ObjectProperty ;
+  rdfs:domain borm:Scenario ;
+  rdfs:range borm:Scenario ;
+  rdfs:label "followsScenario"@en ;
+  skos:prefLabel "followsScenario"@en ;
+  rdfs:comment "Relation for transitions between scenarios."@en .
+
+borm:isFollowedByScenario a owl:ObjectProperty ;
+  owl:inverseOf borm:followsScenario ;
+  rdfs:label "isFollowedByScenario"@en ;
+  skos:prefLabel "isFollowedByScenario"@en ;
+  rdfs:comment "Inversed relation for transitions between scenarios."@en .
+
+borm:hasInitiation a owl:ObjectProperty ;
+  rdfs:domain borm:Scenario ;
+  rdfs:range borm:Initiation ;
+  rdfs:label "hasInitiation"@en ;
+  skos:prefLabel "hasInitiation"@en ;
+  rdfs:comment "It relates a scenario with its initiation."@en .
+
+borm:hasAction a owl:ObjectProperty ;
+  rdfs:domain borm:Scenario ;
+  rdfs:range borm:Action ;
+  rdfs:label "hasAction"@en ;
+  skos:prefLabel "hasAction"@en ;
+  rdfs:comment "It relates a scenario with its action."@en .
+
+borm:hasResult a owl:ObjectProperty ;
+  rdfs:domain borm:Scenario ;
+  rdfs:range borm:Result ;
+  rdfs:label "hasResult"@en ;
+  skos:prefLabel "hasResult"@en ;
+  rdfs:comment "It relates a scenario with its result."@en .
+
+#####################################################################
+## BORM OR - Object Relations
+#####################################################################
+borm:Participant a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "Participant"@en ;
+  skos:prefLabel "Participant"@en ;
+  rdfs:comment "An entity that participates within business processes."@en .
+
+borm:Person a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "Person"@en ;
+  skos:prefLabel "Person"@en ;
+  rdfs:comment "A human-being participant, for example, a cook or a waiter. It is intended to composing an entity together with other information (e.g. using FOAF or ORCID)."@en ;
+  rdfs:subClassOf borm:Participant .
+
+borm:System a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "System"@en ;
+  skos:prefLabel "System"@en ;
+  rdfs:comment "A system-like participant, for example, a e-shop website. It is intended to composing an entity together with other information using a domain classes."@en ;
+  rdfs:subClassOf borm:Participant .
+
+borm:Organization a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "Organization"@en ;
+  skos:prefLabel "Organization"@en ;
+  rdfs:comment "A organization-like participant, for example, a supplier company. It is intended to composing an entity together with other information using a domain classes."@en ;
+  rdfs:subClassOf borm:Participant .
+
+borm:RoleMixin a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  owl:unionOf (borm:Role borm:State) ;
+  rdfs:label "RoleMixin"@en ;
+  skos:prefLabel "RoleMixin"@en ;
+  rdfs:comment "An entity that behaves like a role within a process. It is designed to allow composability of roles within states."@en .
+
+borm:Role a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "Role"@en ;
+  skos:prefLabel "Role"@en ;
+  rdfs:comment "A role of a participant within a certain process."@en ;
+  owl:disjointWith borm:State ;
+  rdfs:subClassOf borm:RoleMixin .
+
+borm:RoleElement a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  owl:unionOf (borm:State borm:Activity) ;
+  rdfs:label "RoleElement"@en ;
+  skos:prefLabel "RoleElement"@en ;
+  rdfs:comment "An entity that may appear as part of a role  within a process."@en .
+
+borm:State a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "State"@en ;
+  skos:prefLabel "State"@en ;
+  rdfs:comment "A state within a role of a participant within a certain process."@en ;
+  owl:disjointWith borm:Role ;
+  owl:disjointWith borm:Activity ;
+  rdfs:subClassOf borm:RoleElement ;
+  rdfs:subClassOf borm:RoleMixin .
+
+borm:Activity a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "Activity"@en ;
+  skos:prefLabel "Activity"@en ;
+  rdfs:comment "An activity within a role of a participant within a certain process. It serves for transition between states or just to provide services via communication."@en ;
+  owl:disjointWith borm:State ;
+  rdfs:subClassOf borm:RoleElement .
+
+borm:Transition a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "Transition"@en ;
+  skos:prefLabel "Transition"@en ;
+  rdfs:comment "A transition between two states via an activity. Moreover, a transition may be constrained."@en .
+
+borm:Communication a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "Communication"@en ;
+  skos:prefLabel "Communication"@en ;
+  rdfs:comment "A communication between two activities of two different roles. It may be related with a certain input and output data flow."@en .
+
+borm:DataFlow a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "DataFlow"@en ;
+  skos:prefLabel "DataFlow"@en ;
+  rdfs:comment "A data flow within a communication."@en .
+
+borm:Constraint a owl:Class ;
+  rdfs:subClassOf borm:Entity ;
+  rdfs:label "Constraint"@en ;
+  skos:prefLabel "Constraint"@en ;
+  rdfs:comment "A constraint that must hold for a transition to be used."@en .
+
+borm:startsWith a owl:ObjectProperty ;
+  rdfs:domain borm:RoleMixin ;
+  rdfs:range borm:State ;
+  rdfs:label "startsWith"@en ;
+  skos:prefLabel "startsWith"@en ;
+  rdfs:comment "It relates a role-like entity with its starting state. If entity has a start state, then it must have also end state to which exists a process flow."@en .
+
+borm:endsWith a owl:ObjectProperty ;
+  rdfs:domain borm:RoleMixin ;
+  rdfs:range borm:State ;
+  rdfs:label "endsWith"@en ;
+  skos:prefLabel "endsWith"@en ;
+  rdfs:comment "It relates a role-like entity with its ending state. If entity has a end state, then it must have also start state from which exists a process flow."@en .
+
+borm:sourceState a owl:ObjectProperty, owl:FunctionalProperty ;
+  rdfs:domain borm:Transition ;
+  rdfs:range borm:State ;
+  rdfs:label "sourceState"@en ;
+  skos:prefLabel "sourceState"@en ;
+  rdfs:comment "It relates a transition with its source state."@en .
+
+borm:targetState a owl:ObjectProperty, owl:FunctionalProperty ;
+  rdfs:domain borm:Transition ;
+  rdfs:range borm:State ;
+  rdfs:label "targetState"@en ;
+  skos:prefLabel "targetState"@en ;
+  rdfs:comment "It relates a transition with its target state."@en .
+
+borm:transitsThrough a owl:ObjectProperty, owl:FunctionalProperty ;
+  rdfs:domain borm:Transition ;
+  rdfs:range borm:Activity ;
+  rdfs:label "transitsThrough"@en ;
+  skos:prefLabel "transitsThrough"@en ;
+  rdfs:comment "It relates a transition with an activity which is used for a transition."@en .
+
+borm:transitsTo a owl:ObjectProperty ;
+  owl:inverseOf borm:sourceState ;
+  rdfs:label "transitsTo"@en ;
+  skos:prefLabel "transitsTo"@en ;
+  rdfs:comment "It relates a source state with a transition."@en .
+
+borm:transitsFrom a owl:ObjectProperty ;
+  owl:inverseOf borm:targetState ;
+  rdfs:label "transitsFrom"@en ;
+  skos:prefLabel "transitsFrom"@en ;
+  rdfs:comment "It relates a target state with a transition."@en .
+
+borm:transits a owl:ObjectProperty ;
+  owl:inverseOf borm:transitsThrough ;
+  rdfs:label "transits"@en ;
+  skos:prefLabel "transits"@en ;
+  rdfs:comment "It relates an activity with a transition that uses it."@en .
+
+borm:hasElement a owl:ObjectProperty ;
+  rdfs:domain borm:RoleMixin ;
+  rdfs:range borm:RoleElement ;
+  rdfs:label "hasElement"@en ;
+  skos:prefLabel "hasElement"@en ;
+  rdfs:comment "It relates role-like entity with its element."@en .
+
+borm:hasActivity a owl:ObjectProperty ;
+  rdfs:domain borm:RoleMixin ;
+  rdfs:range borm:Activity ;
+  rdfs:subPropertyOf borm:hasElement ;
+  rdfs:label "hasActivity"@en ;
+  skos:prefLabel "hasActivity"@en ;
+  rdfs:comment "It relates role-like entity with its activity."@en .
+
+borm:hasState a owl:ObjectProperty ;
+  rdfs:domain borm:RoleMixin ;
+  rdfs:range borm:State ;
+  rdfs:subPropertyOf borm:hasElement ;
+  rdfs:label "hasState"@en ;
+  skos:prefLabel "hasState"@en ;
+  rdfs:comment "It relates role-like entity with its state."@en .
+
+borm:ofRole a owl:ObjectProperty ;
+  owl:inverseOf borm:hasElement;
+  rdfs:label "ofRole"@en ;
+  skos:prefLabel "ofRole"@en ;
+  rdfs:comment "It relates role element with a role where it belongs."@en .
+
+borm:sourceActivity a owl:ObjectProperty, owl:FunctionalProperty ;
+  rdfs:domain borm:Communication ;
+  rdfs:range borm:Activity ;
+  rdfs:label "sourceActivity"@en ;
+  skos:prefLabel "sourceActivity"@en ;
+  rdfs:comment "It relates communication with its source activity."@en .
+
+borm:targetActivity a owl:ObjectProperty, owl:FunctionalProperty ;
+  rdfs:domain borm:Communication ;
+  rdfs:range borm:Activity ;
+  rdfs:label "targetActivity"@en ;
+  skos:prefLabel "targetActivity"@en ;
+  rdfs:comment "It relates communication with its target activity."@en .
+
+borm:hasDataFlow a owl:ObjectProperty ;
+  rdfs:domain borm:Communication ;
+  rdfs:range borm:DataFlow ;
+  rdfs:label "hasDataFlow"@en ;
+  skos:prefLabel "hasDataFlow"@en ;
+  rdfs:comment "It relates communication with its data flow."@en .
+
+borm:hasInputFlow a owl:ObjectProperty ;
+  rdfs:domain borm:Communication ;
+  rdfs:range borm:DataFlow ;
+  rdfs:subPropertyOf borm:hasDataFlow ;
+  rdfs:label "hasInputFlow"@en ;
+  skos:prefLabel "hasInputFlow"@en ;
+  rdfs:comment "It relates communication with its input data flow."@en .
+
+borm:hasOutputFlow a owl:ObjectProperty ;
+  rdfs:domain borm:Communication ;
+  rdfs:range borm:DataFlow ;
+  rdfs:subPropertyOf borm:hasDataFlow ;
+  rdfs:label "hasOutputFlow"@en ;
+  skos:prefLabel "hasOutputFlow"@en ;
+  rdfs:comment "It relates communication with its output data flow."@en .
+
+borm:ofCommunication a owl:ObjectProperty ;
+  rdfs:domain borm:Constraint ;
+  rdfs:range borm:Communication ;
+  rdfs:label "ofCommunication"@en ;
+  skos:prefLabel "ofCommunication"@en ;
+  rdfs:comment "It relates constraint with communication."@en .
+
+borm:ofTransition a owl:ObjectProperty ;
+  rdfs:domain borm:Constraint ;
+  rdfs:range borm:Transition ;
+  rdfs:label "ofTransition"@en ;
+  skos:prefLabel "ofTransition"@en ;
+  rdfs:comment "It relates constraint with transition."@en .

@@ -1,0 +1,108 @@
+# Example of BORM ontology used with one of the examples
+# from Craft.CASE tool: E-shop
+#
+@prefix borm: <https://purl.org/ontoborm#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+@base <https://purl.org/ontoborm/examples/eshop#> .
+
+## BA
+:myEShop a borm:Business ;
+	rdfs:label "My E-Shop Example" ;
+	borm:hasFunction :f1, :f2, :f3, :f4 ;
+	
+:f1 a borm:ExternalFunction ;
+	rdfs:label "Sell Food" ;
+  rdfs:comment "Core business of FD company. Here is a collection of proceses performed by or performed for clients." .
+	
+:f2 a borm:ExternalFunction ;
+	rdfs:label "Dispatch Orders" ;
+  rdfs:comment "Here is collection of processes performed by FD management. This is about route planning, orders dispatching etc." .
+	
+:f3 a borm:InternalFunction ;
+	rdfs:label "Maintain Stock" ;
+  rdfs:comment "FD company internal responsibility. Here is collection of processes with no direct interface to any client." .
+	
+:f4 a borm:InternalFunction ;
+	rdfs:label "FD Website Maintenance" ;
+  rdfs:comment "User management, database actualization, SW and HW maintenance." .
+	
+:sce1 a borm:Scenario ;
+	borm:usesScenario :sce1 ;
+	borm:ofFunction :fun1 ;
+	rdfs:label "customer places an order for food by the website" .
+	
+:sce2 a borm:Scenario ;
+	borm:usesScenario :sce1 ;
+	borm:followedByScenario :sce3 ;
+	borm:ofFunction :fun1 ;
+	borm:hasIntitiation :init21 ;
+	rdfs:label "schedule delivery" .
+
+## Participants
+:parSupplier a borm:Participant, owl:Class ;
+	rdfs:label "Supplier" ;
+  rdfs:comment "Small company or individual farmer." .
+	
+:parSupermarketSupplier a borm:Participant, owl:Class ;
+	rdfs:label "Supermarker Supplier" ;
+	rdfs:subClassOf :parSupplier ;
+  rdfs:comment "Department of Supermarket responsible for food delivery." .
+	
+:parFDDatabase a borm:System, owl:Class ;
+	rdfs:label "FD Database" ;
+  rdfs:comment "Database of products, orders, routes, customers and suppliers." .
+	
+:parFDWebsite a borm:System, owl:Class ;
+	rdfs:label "FD Website" ;
+  rdfs:comment "Communication software enabling orders." .
+	
+:parFDWebsite a borm:System, owl:Class ;
+	rdfs:label "Supplier Ordering System" ;
+  rdfs:comment "Automatic system for requesting suppliers for food." .
+	
+:parVanDriver a borm:Person, owl:Class ;
+	rdfs:label "Van Driver" ;
+  rdfs:comment "Person who delivers food." .
+	
+:parLogisticsManager a borm:Person, owl:Class ;
+	rdfs:label "Logistics Manager" ;
+  rdfs:comment "Person responsible for the distribution of orders. This person uses information and scheduling system." .
+	
+:parCustomer a borm:Participant, owl:Class ;
+	rdfs:label "Customer" ;
+  rdfs:comment "Person who orders food or a person who wants to be a customer." .
+
+# OR: write delivery
+:ro1 a borm:Role ;
+	borm:startsWith :st1 ;
+	borm:endsWith :st4 .
+
+:st1 a borm:StartState ;
+	borm:ofRole :ro1 .
+
+:act1 a borm:Activity ;
+	borm:ofRole :ro1 ;
+	rdfs:label "opens website" .
+	
+:tr1 a borm:Transition ;
+	borm:sourceState :st1 ;
+	borm:targetState :st2 ;
+	borm:transitsThrough :act1 .
+	
+:df1 a borm:DataFlow ;
+	rdfs:label "Login data" .
+	
+:co1 a borm:SynchronousCommunication ;
+	borm:sourceActivity :act1 ;
+	borm:targetActivity :act4 ;
+	borm:hasInputFlow :df1 .
